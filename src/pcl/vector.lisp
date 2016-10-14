@@ -446,7 +446,7 @@
               `(let ((.typecheckfun. (slot-info-typecheck (svref ,pv (1+ ,pv-offset)))))
                  (declare (type (or function null) .typecheckfun.))
                  (if .typecheckfun.
-                     (funcall .typecheckfun. ,new-value)
+                     (setf ,new-value (funcall .typecheckfun. ,new-value))
                      ,new-value))
               new-value)))
     `(locally (declare #.*optimize-speed*)

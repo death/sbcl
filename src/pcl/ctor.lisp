@@ -899,15 +899,6 @@
         finally
           (return (values around before (first primary) (reverse after)))))
 
-(defmacro with-type-checked ((type safe-p) &body body)
-  (if safe-p
-      ;; To handle FUNCTION types reasonable, we use SAFETY 3 and
-      ;; THE instead of e.g. CHECK-TYPE.
-      `(locally
-           (declare (optimize (safety 3)))
-         (the ,type (progn ,@body)))
-      `(progn ,@body)))
-
 ;;; Return as multiple values bindings for default initialization arguments,
 ;;; variable names, defaulting initargs and a body for initializing instance
 ;;; and class slots of an object costructed by CTOR. The variable .SLOTS. is
@@ -917,6 +908,7 @@
 ;;; them.
 (defun slot-init-forms (ctor early-unbound-markers-p setf-svuc-slots sbuc-slots)
   (let* ((class (ctor-class ctor))
+         (class-name (class-name class))
          (initargs (ctor-initargs ctor))
          (initkeys (plist-keys initargs))
          (safe-p (ctor-safe-p ctor))
@@ -1012,7 +1004,10 @@
                                            ,class .instance. ,slotd)
                                           ,value-form)
                                    `(setf (clos-slots-ref .slots. ,i)
-                                          (with-type-checked (,type ,safe-p)
+                                          (with-type-checked (,type
+                                                              ,safe-p
+                                                              ,class-name
+                                                              ,(slot-definition-name slotd))
                                             ,value-form))))
                              (not-boundp-form ()
                                (if (member slotd sbuc-slots :test #'eq)
@@ -1065,7 +1060,10 @@
                        (push name names)
                        (push location locations)
                        `(setf (cdr ,name)
-                              (with-type-checked (,type ,safe-p)
+                              (with-type-checked (,type
+                                                  ,safe-p
+                                                  ,class-name
+                                                  ,(slot-definition-name slotd))
                                 ,init-form)))
                   into class-init-forms
                   finally (return (values (nreverse names)

@@ -225,14 +225,14 @@
           :type (or null (function (fixnum) fixnum)))))
 
 (with-test (:name (:type :function))
-  (setf (slot1-of (make-instance 'a)) (lambda () 1))
-  (setf (slot1-of (make-instance 'b)) (lambda () 1))
+  (setf (slot1-of (make-instance 'a)) (lambda (x) (declare (type fixnum x)) x))
+  (setf (slot1-of (make-instance 'b)) (lambda (x) (declare (type fixnum x)) x))
   (assert-error (setf (slot1-of (make-instance 'a)) 1)
                 type-error)
   (assert-error (setf (slot1-of (make-instance 'b)) 1)
                 type-error)
-  (make-instance 'a :slot1 (lambda () 1))
-  (make-instance 'b :slot1 (lambda () 1)))
+  (make-instance 'a :slot1 (lambda (x) (declare (type fixnum x)) x))
+  (make-instance 'b :slot1 (lambda (x) (declare (type fixnum x)) x)))
 
 (with-test (:name :alternate-metaclass/standard-instance-structure-protocol)
   (defclass my-alt-metaclass (standard-class) ())
