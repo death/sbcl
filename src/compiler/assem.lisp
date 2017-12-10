@@ -1337,7 +1337,8 @@
                      (if tail
                          (setf (cdr tail) next)
                          (setf (segment-annotations segment) next)))
-                   (setf next (cdr prev))))))
+                   (when prev
+                     (setf next (cdr prev)))))))
         (cond ((back-patch-p note)
                (fill-in (back-patch-fun note)
                         (back-patch-size note)))
