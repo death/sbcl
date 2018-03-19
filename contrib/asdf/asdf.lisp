@@ -3618,9 +3618,7 @@ Please only define ~S and secondary systems with a name starting with ~S (e.g. ~
   ;; in a file at PATHNAME, for given COMPONENT with given PARENT, normalize the form
   ;; to an acceptable ASDF-format version.
   (defun* (normalize-version) (form &key pathname component parent)
-    (labels ((invalid (&optional (continuation "using NIL instead"))
-               (warn (compatfmt "~@<Invalid :version specifier ~S~@[ for component ~S~]~@[ in ~S~]~@[ from file ~S~]~@[, ~A~]~@:>")
-                     form component parent pathname continuation))
+    (labels ((invalid (&optional (continuation "using NIL instead")))
              (invalid-parse (control &rest args)
                (unless (if-let (target (find-component parent component)) (builtin-system-p target))
                  (apply 'warn control args)
@@ -3809,12 +3807,6 @@ system names contained using COERCE-NAME. Return the result."
      (let* ((name (coerce-name name))
             (source-file (if sfp source-file (resolve-symlinks* (load-pathname))))))
      (flet ((fix-case (x) (if (logical-pathname-p source-file) (string-downcase x) x))))
-     (let* ((asd-name (and source-file
-                           (equal "asd" (fix-case (pathname-type source-file)))
-                           (fix-case (pathname-name source-file))))
-            (primary-name (primary-system-name name)))
-       (when (and asd-name (not (equal asd-name primary-name)))
-         (warn (make-condition 'bad-system-name :source-file source-file :name name))))
      (let* (;; NB: handle defsystem-depends-on BEFORE to create the system object,
             ;; so that in case it fails, there is no incomplete object polluting the build.
             (checked-defsystem-depends-on
